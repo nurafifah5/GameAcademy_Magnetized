@@ -5,12 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb2D;
-    public float moveSpeed = 5f;
-    public float pullForce = 100f;
-    public float rotateSpeed = 360f;
-    private GameObject closestTower;
-    private GameObject hookedTower;
-    private bool isPulled = false;
+    public float moveSpeed = 1f;
     private UIController uiControl;
     private AudioSource myAudio;
     private bool isCrashed = false;
@@ -38,33 +33,6 @@ public class PlayerController : MonoBehaviour
             }
         }
         
-        if (Input.GetKey(KeyCode.Z) && !isPulled)
-        {
-            Debug.Log("Z clicked");
-            if (closestTower != null && hookedTower == null)
-            {
-                hookedTower = closestTower;
-            }
-            if (hookedTower)
-            {
-                float distance = Vector2.Distance(transform.position, hookedTower.transform.position);
-
-                //Gravitation toward tower
-                Vector3 pullDirection = (hookedTower.transform.position - transform.position).normalized;
-                float newPullForce = Mathf.Clamp(pullForce / distance, 20, 50);
-                rb2D.AddForce(pullDirection * newPullForce);
-
-                //Angular velocity
-                rb2D.angularVelocity = -rotateSpeed / distance;
-                isPulled = true;
-            }
-        }
-        if (Input.GetKeyUp(KeyCode.Z))
-        {
-            rb2D.angularVelocity = 0;
-            isPulled = false;
-            hookedTower = null;
-        }
     }
 
     public void OnCollisionEnter2D(Collision2D collision)
@@ -94,29 +62,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void OnTriggerStay2D(Collider2D collision)
-    {
-        if (collision.gameObject.tag == "Tower")
-        {
-            closestTower = collision.gameObject;
-
-            //Change tower color back to green as indicator
-            collision.gameObject.GetComponent<SpriteRenderer>().color = Color.blue;
-        }
-    }
-
-    public void OnTriggerExit2D(Collider2D collision)
-    {
-        if (isPulled) return;
-        if(collision.gameObject.tag == "Tower")
-        {
-            closestTower = null;
-            hookedTower = null;
-            //change tower color back to normal
-            collision.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-        }
-    }
-
     public void restartPosition()
     {
         //set to start position
@@ -127,10 +72,5 @@ public class PlayerController : MonoBehaviour
 
         //set isCrashed to false
         isCrashed = false;
-        if (closestTower)
-        {
-            closestTower.GetComponent<SpriteRenderer>().color = Color.white;
-            closestTower = null;
-        }
     }
 }
